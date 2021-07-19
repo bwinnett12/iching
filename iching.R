@@ -16,7 +16,7 @@ dir.create("temp")
 create_csv <- function(csv_current) {
 
   # File name that can be reused
-  file_name <- paste("temp/","csv_",  toString(csv_current), ".csv", sep="")
+  file_name <- paste("./temp/","csv_",  toString(csv_current), ".csv", sep="")
   file.create(file_name)
   
   # Generates 10000 (A myriad) of numbers that can be written to the text
@@ -29,7 +29,7 @@ create_csv <- function(csv_current) {
 create_txt <- function(txt_current) {
   
   # File name that can be reused
-  file_name <- paste("temp/","txt_",  toString(txt_current), ".txt", sep="")
+  file_name <- paste("./temp/","txt_",  toString(txt_current), ".txt", sep="")
   file.create(file_name)
   
   # Generates A myriad (10000) of numbers that can be written to the text
@@ -42,7 +42,7 @@ create_txt <- function(txt_current) {
 # While it is possible to do this in 2 - 3 lines with a list.files(pattern...)
 # I kept it this way to preserve a bit more of randomness
 delete_csv <- function() {
-  all_files <- list.files("./temp")
+  all_files <- list.files("temp")
   
   # Repeats cycling through until a csv is found
   repeat {  
@@ -59,7 +59,7 @@ delete_csv <- function() {
 # While it is possible to do this in 2 - 3 lines with a list.files(pattern...)
 # I kept it this way to preserve a bit more of randomness
 delete_txt <- function() {
-  all_files <- list.files("./temp")
+  all_files <- list.files("temp")
   
   # Repeats cycling through until a csv is found
   repeat {  
@@ -77,116 +77,185 @@ delete_txt <- function() {
 reading <- rep("x", 6)   # This will be your reading once done
 
 
-
-
-
-
-# Counts of how many we he have. Also nice for numbering purposes
-csv_count <- 0
-txt_count <- 0
-
-# For sake of complete randomness and not anarchy, making 150 files
-for (x in 1:150) {
-  # Generating a random number
-  random_number <- runif(1, min=0, max=10)
+for (slot in 1:length(reading)) {
+  # Counts of how many we he have. Also nice for numbering purposes
+  csv_count <- 0
+  txt_count <- 0
+  # Placeholder for stroke. Broken is csv, Solid is txt
+  stroke <- ""
   
-  # TXT case (greater than 5. Generates a text file with 10000 ones and zeros)
-  # (Function defined above)
-  if (random_number > 5) {
-    txt_count = txt_count + 1 
-    create_txt(txt_count)
-  }
-  
-  # The CSV case (less than 5). Generates a csv with 10000 1 & zeroes in a
-  # Double column  (Function defined above)
-  else {
-    csv_count = csv_count + 1
-    create_csv(csv_count)
-  }
-}
-
-# The balancing act
-# Runs until one of two conditions are met
-# 1) One is double the other
-# 2) The totals are equal
-repeat {
-  # Next chunk is resetting counters of whats in the folder
-  all_files <- list.files("./temp")
-  
-  
-  # Completion conditions check.... If not... Time for the next round!
-  if (csv_count == txt_count 
-      || abs(csv_count - txt_count) >= min(csv_count, txt_count)) {
+  # For sake of complete randomness and not anarchy, making 150 files
+  for (x in 1:150) {
+    # Generating a random number
+    random_number <- runif(1, min=0, max=10)
     
-    # Prints out which one was victorious
-    print(c("csv_count", "txt_count")[which.max(c(csv_count, txt_count))])
-    break
-  } 
-  
-  # Cap this whole thing at 5000
-  if (length(all_files) >= 5000) {
-    print(c("csv_count", "txt_count")[which.min(c(csv_count, txt_count))])
-    break
-  }
-  
-  # Randomly select one of the files
-  # Case for if a csv was chosen
-  if (grepl(".csv", 
-            all_files[floor(runif(1, min= 1, max = length(all_files)) + 1)], 
-            fixed=TRUE)) {
-    
-    # If csv is in the lead by 50%
-    if ((csv_count - txt_count) >= (min(csv_count, txt_count) * 0.50)) {
-      
-      # Make 2 csv, make 1 txt
-      create_csv(csv_count)
-      csv_count = csv_count + 1
-      
-      create_csv(csv_count)
-      csv_count = csv_count + 1
-      
-      create_txt(txt_count)
+    # TXT case (greater than 5. Generates a text file with 10000 ones and zeros)
+    # (Function defined above)
+    if (random_number > 5) {
       txt_count = txt_count + 1 
+      create_txt(txt_count)
     }
     
-    # Not in the lead
+    # The CSV case (less than 5). Generates a csv with 10000 1 & zeroes in a
+    # Double column  (Function defined above)
     else {
-      # Make 1 csv, make 2 txt
-      create_csv(csv_count)
       csv_count = csv_count + 1
+      create_csv(csv_count)
+    }
+  }
+  
+  # The balancing act
+  # Runs until one of two conditions are met
+  # 1) One is double the other
+  # 2) The totals are equal
+  repeat {
+    # Next chunk is resetting counters of whats in the folder
+    all_files <- list.files("./temp")
+    
+    
+    # Completion conditions check.... If not... Time for the next round!
+    if (csv_count == txt_count 
+        || abs(csv_count - txt_count) >= min(csv_count, txt_count)) {
       
-      create_txt(txt_count)
-      txt_count = txt_count + 1
+      # Prints out which one was victorious
+      print(c("csv_count", "txt_count")[which.max(c(csv_count, txt_count))])
       
-      create_txt(txt_count)
-      txt_count = txt_count + 1
+      # If they're equal, then pick a random one
+      if (csv_count == txt_count) {
+        
+        # Mimics case earlier. CSV is broken and txt is solid
+        if (floor(runif(1, min=0, max=10)) > 5) {
+          stroke = "solid"
+        }
+        else {
+          stroke = "broken"
+        }
+      } else {
+        # Otherwise pick the larger one
+        stroke <- ifelse(c("csv_count", "txt_count")[which.max(c(csv_count, txt_count))]
+                           == "txt_count", "solid", "broken")
+
+      }
+      break
+    } 
+    
+    # Cap this whole thing at 5000
+    if (length(all_files) >= 500) {
+      print(c("csv_count", "txt_count")[which.min(c(csv_count, txt_count))])
+      break
     }
     
-    
+    # Randomly select one of the files
+    # Case for if a csv was chosen
+    if (grepl(".csv", 
+              all_files[floor(runif(1, min= 1, max = length(all_files)) + 1)], 
+              fixed=TRUE)) {
+      
+      # If csv is in the lead by 50%
+      if ((csv_count - txt_count) >= (min(csv_count, txt_count) * 0.50)) {
+        
+        # Make 2 csv, make 1 txt
+        create_csv(csv_count)
+        csv_count = csv_count + 1
+        
+        create_csv(csv_count)
+        csv_count = csv_count + 1
+        
+        create_txt(txt_count)
+        txt_count = txt_count + 1 
+      }
+      
+      # Not in the lead
+      else {
+        # Make 1 csv, make 2 txt
+        create_csv(csv_count)
+        csv_count = csv_count + 1
+        
+        create_txt(txt_count)
+        txt_count = txt_count + 1
+        
+        create_txt(txt_count)
+        txt_count = txt_count + 1
+      }
+      
+      
+    }
+    # Case for if a txt was chosen
+    else {
+      
+      # If txt is in the lead by 50%
+      if ((txt_count - csv_count) >= (min(csv_count, txt_count) * 0.50)) {
+        # Make 1 txt, make 1 csv
+        create_csv(csv_count)
+        csv_count = csv_count + 1
+        
+        create_txt(txt_count)
+        txt_count = txt_count + 1
+        
+      }
+      # Not in the lead
+      else {
+        # Make 1 txt, delete 1 csv
+        create_txt(txt_count)
+        txt_count = txt_count + 1 
+        
+        delete_csv()
+        csv_count = csv_count - 1
+      }
+    }
   }
-  # Case for if a txt was chosen
+  
+  # Once to this point. There is a winning file format
+  # Pick a random of the file type
+  if (stroke == "broken") {
+    # Case for csv
+    winner_all <- list.files("./temp", pattern = ".csv")
+    
+    winner_file <- paste("./temp/", 
+                         winner_all[floor(runif(1, min= 1, max = length(winner_all)) + 1)],
+                         sep = "")
+    
+    winner_data <- read.csv(winner_file)
+
+    
+    # Picking the 81st number, stored in the second column
+    if (winner_data[81, 2] == 0) {
+      reading[slot] = "0"
+    } 
+    else {
+      reading[slot] = "1"
+    }
+  }
+  
   else {
+    # List of all text files
+    winner_all <- list.files("./temp", pattern = ".txt")
+    # random txt file
+    winner_file <- paste("./temp/", 
+                         winner_all[floor(runif(1, min= 1, max = length(winner_all)) + 1)],
+                         sep = "")
     
-    # If txt is in the lead by 50%
-    if ((txt_count - csv_count) >= (min(csv_count, txt_count) * 0.50)) {
-      # Make 1 txt, make 1 csv
-      create_csv(csv_count)
-      csv_count = csv_count + 1
-      
-      create_txt(txt_count)
-      txt_count = txt_count + 1
-      
-    }
-    # Not in the lead
+    # Reads the document as a table (Its a column of 5 letters)
+    winner_data <- read.table(winner_file)
+    
+    # Picks the 81st number stored in the second column (to match the csv winner)
+    if (winner_data[81, 2] == 0) {
+      reading[slot] = "0"
+    } 
     else {
-      # Make 1 txt, delete 1 csv
-      create_txt(txt_count)
-      txt_count = txt_count + 1 
-      
-      delete_csv()
-      csv_count = csv_count - 1
+      reading[slot] = "1"
     }
   }
+  
+  print(reading)
+  # Deletes temp
+  if (dir.exists("temp")) {
+    unlink("temp", recursive=TRUE)
+  }
+  if (slot != 6) {
+    dir.create("temp")
+  }
+  
 }
 
 
@@ -197,8 +266,3 @@ repeat {
 
 
 
-
-# Deletes temp
-if (dir.exists("temp")) {
-  unlink("temp", recursive=TRUE)
-}
